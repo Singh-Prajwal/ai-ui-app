@@ -18,7 +18,7 @@ export default function Home() {
   const [isReady, setIsReady] = useState(false);
   const [resume, setResume] = useState<any>();
   const [jobDesc, setJobDesc] = useState<string>("");
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<any>([]);
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [questions, setQuestions] = useState<string[]>([]);
@@ -132,7 +132,7 @@ export default function Home() {
       ]);
     } finally {
       const currentAiQuestionCount = messages.filter(
-        (m) => m.role === "ai"
+        (m: any) => m.role === "ai"
       ).length;
       if (!(currentAiQuestionCount >= 10 && isInterviewActive)) {
         setLoading(false);
