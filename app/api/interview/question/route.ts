@@ -7,7 +7,7 @@ interface InterviewCategory {
 }
 
 export async function POST(req: NextRequest) {
-  const { name, skills, history } = await req.json();
+  const { name, skills, history, jobDesc } = await req.json();
   const messages = [
     {
       role: "user",
@@ -16,6 +16,8 @@ export async function POST(req: NextRequest) {
         """${name}"""
         Candidate skills:
         """${skills}"""
+        Job description:
+        """${jobDesc}"""
         Context: 
         - Focus on the technologies and skills listed to generate technical questions.
         - Ask one clear and specific technical question at a time based on the candidate's expertise.
@@ -30,24 +32,12 @@ export async function POST(req: NextRequest) {
     })),
   ];
 
-  // try {
   const completion = await openai.chat.completions.create({
     model: "deepseek/deepseek-r1:free",
     messages: messages,
   });
   const content = completion.choices[0].message.content;
   console.log("OpenAI response:", completion.choices[0].message.content);
-  // const lines = content!.split("\n");
-  // const questions: string[] = [];
-
-  // for (const line of lines) {
-  //   const trimmed = line.trim();
-  //   if (trimmed.match(/^\d+\.\s*".+"$/) || trimmed.startsWith("-")) {
-  //     questions.push(
-  //       trimmed.replace(/^\d+\.\s*|^- /, "").replace(/^"|"$/g, "")
-  //     );
-  //   }
-  // }
 
   return NextResponse.json({
     question: content || "Tell me about yourself.",

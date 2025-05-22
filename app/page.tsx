@@ -33,7 +33,6 @@ export default function Home() {
 
     const formData = new FormData();
     formData.append("file", file);
-
     try {
       const response = await fetch("http://localhost:5000/api/upload", {
         method: "POST",
@@ -65,7 +64,7 @@ export default function Home() {
       const res = await fetch("/api/interview/question", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, skills, history: [] }),
+        body: JSON.stringify({ name, skills, history: [], jobDesc }),
       });
 
       if (!res.ok) throw new Error(res.statusText);
@@ -173,7 +172,13 @@ export default function Home() {
               className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
               disabled={loading}
             />
-
+            <input
+              type="text"
+              placeholder="Job Description (optional)"
+              value={jobDesc}
+              onChange={(e) => setJobDesc(e.target.value)}
+              className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
+            />
             {name && (
               <p className="mb-2">
                 <strong>Name:</strong> {name}
