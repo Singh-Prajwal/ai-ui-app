@@ -1,104 +1,89 @@
-<a href="https://demo-nextjs-with-supabase.vercel.app/">
-  <img alt="Next.js and Supabase Starter Kit - the fastest way to build apps with Next.js and Supabase" src="https://demo-nextjs-with-supabase.vercel.app/opengraph-image.png">
-  <h1 align="center">Next.js and Supabase Starter Kit</h1>
-</a>
+# 🧠 AI Interview Bot – Fullstack App
 
-<p align="center">
- The fastest way to build apps with Next.js and Supabase
-</p>
+An intelligent, adaptive AI Interviewer that simulates job interviews by asking personalized questions, analyzing candidate responses, and generating detailed feedback. Built using **Next.js** for both frontend and backend, and a **Flask** microservice for resume parsing. Interview data is stored on **Supabase**.  
 
-<p align="center">
-  <a href="#features"><strong>Features</strong></a> ·
-  <a href="#demo"><strong>Demo</strong></a> ·
-  <a href="#deploy-to-vercel"><strong>Deploy to Vercel</strong></a> ·
-  <a href="#clone-and-run-locally"><strong>Clone and run locally</strong></a> ·
-  <a href="#feedback-and-issues"><strong>Feedback and issues</strong></a>
-  <a href="#more-supabase-examples"><strong>More Examples</strong></a>
-</p>
-<br/>
+🌐 **Live App**: [https://ai-ui-app.vercel.app](https://ai-ui-app.vercel.app)  
+🎥 **Demo Video**: [Watch here](https://drive.google.com/file/d/1pW4Yk5aH_kSRxAgPGKAoTajue8MNEIxJ/view)
 
-## Features
+---
 
-- Works across the entire [Next.js](https://nextjs.org) stack
-  - App Router
-  - Pages Router
-  - Middleware
-  - Client
-  - Server
-  - It just works!
-- supabase-ssr. A package to configure Supabase Auth to use cookies
-- Styling with [Tailwind CSS](https://tailwindcss.com)
-- Components with [shadcn/ui](https://ui.shadcn.com/)
-- Optional deployment with [Supabase Vercel Integration and Vercel deploy](#deploy-your-own)
-  - Environment variables automatically assigned to Vercel project
+## 🛠 Tech Stack
 
-## Demo
+### Frontend & Backend (Monorepo)
+- [Next.js 14](https://nextjs.org/) (App Router)
+- Tailwind CSS
+- OpenAI API (free tier for question & feedback generation)
+- Supabase (DB + Auth)
+- Fetch
 
-You can view a fully working demo at [demo-nextjs-with-supabase.vercel.app](https://demo-nextjs-with-supabase.vercel.app/).
+### Resume Parsing Microservice
+- [Python Flask](https://flask.palletsprojects.com/)
+- `PyPDF2` for resume text extraction
 
-## Deploy to Vercel
+---
 
-Vercel deployment will guide you through creating a Supabase account and project.
+## 🧩 Features
 
-After installation of the Supabase integration, all relevant environment variables will be assigned to the project so the deployment is fully functioning.
+✅ Upload resume & job description  
+✅ AI asks personalized questions in a chat interface  
+✅ Adaptive question flow based on previous answers  
+✅ Interview auto-completes intelligently (no button press needed)  
+✅ Flask API parses the resume to extract relevant information  
+✅ OpenAI (GPT) used to:
+- Generate questions from resume + JD
+- Analyze responses and generate final feedback  
+✅ Stores:
+- Full interview transcript
+- Candidate name
+- Final feedback in Supabase
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&project-name=nextjs-with-supabase&repository-name=nextjs-with-supabase&demo-title=nextjs-with-supabase&demo-description=This+starter+configures+Supabase+Auth+to+use+cookies%2C+making+the+user%27s+session+available+throughout+the+entire+Next.js+app+-+Client+Components%2C+Server+Components%2C+Route+Handlers%2C+Server+Actions+and+Middleware.&demo-url=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2F&external-id=https%3A%2F%2Fgithub.com%2Fvercel%2Fnext.js%2Ftree%2Fcanary%2Fexamples%2Fwith-supabase&demo-image=https%3A%2F%2Fdemo-nextjs-with-supabase.vercel.app%2Fopengraph-image.png)
+---
 
-The above will also clone the Starter kit to your GitHub, you can clone that locally and develop locally.
+## 📂 Repositories
 
-If you wish to just develop locally and not deploy to Vercel, [follow the steps below](#clone-and-run-locally).
+- **Frontend & Backend (Next.js)**: [https://github.com/Singh-Prajwal/ai-ui-app](https://github.com/Singh-Prajwal/ai-ui-app)  
+- **Resume Parsing API (Flask)**: [https://github.com/Singh-Prajwal/ai-flask-app](https://github.com/Singh-Prajwal/ai-flask-app)
 
-## Clone and run locally
+---
 
-1. You'll first need a Supabase project which can be made [via the Supabase dashboard](https://database.new)
+## 🚧 Missing Features (Planned)
 
-2. Create a Next.js app using the Supabase Starter template npx command
+- 🔊 Text-to-Speech (AI speaks the questions)
+- 🎙️ Speech-to-Text (User can respond via voice)
 
-   ```bash
-   npx create-next-app --example with-supabase with-supabase-app
-   ```
+---
 
-   ```bash
-   yarn create next-app --example with-supabase with-supabase-app
-   ```
+## ⚠️ Notes
 
-   ```bash
-   pnpm create next-app --example with-supabase with-supabase-app
-   ```
+- This project currently uses **OpenAI's free-tier API**, which has token and usage limits. If the API fails during testing due to auth or quota issues, feel free to contact me — I’ll refresh the API key promptly.
 
-3. Use `cd` to change into the app's directory
+---
 
-   ```bash
-   cd with-supabase-app
-   ```
+## 🧪 Running Locally
 
-4. Rename `.env.example` to `.env.local` and update the following:
+### 1. Clone both repositories:
 
-   ```
-   NEXT_PUBLIC_SUPABASE_URL=[INSERT SUPABASE PROJECT URL]
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=[INSERT SUPABASE PROJECT API ANON KEY]
-   ```
+```bash
+git clone https://github.com/Singh-Prajwal/ai-ui-app
+git clone https://github.com/Singh-Prajwal/ai-flask-app
+```
+### 2. Set up environment variables:
+For Next.js app (ai-ui-app), create a .env.local file:
+    
+    NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+    NEXT_PUBLIC_SUPABASE_ANON_KEY=your_anon_key
+    NEXT_PUBLIC_OPENAI_API_KEY=your_openai_api_key
+    
+### 3. Start the Flask backend:
+```bash
+cd ai-flask-app
+pip install -r requirements.txt
+python app.py
+```
 
-   Both `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY` can be found in [your Supabase project's API settings](https://app.supabase.com/project/_/settings/api)
-
-5. You can now run the Next.js local development server:
-
-   ```bash
-   npm run dev
-   ```
-
-   The starter kit should now be running on [localhost:3000](http://localhost:3000/).
-
-6. This template comes with the default shadcn/ui style initialized. If you instead want other ui.shadcn styles, delete `components.json` and [re-install shadcn/ui](https://ui.shadcn.com/docs/installation/next)
-
-> Check out [the docs for Local Development](https://supabase.com/docs/guides/getting-started/local-development) to also run Supabase locally.
-
-## Feedback and issues
-
-Please file feedback and issues over on the [Supabase GitHub org](https://github.com/supabase/supabase/issues/new/choose).
-
-## More Supabase examples
-
-- [Next.js Subscription Payments Starter](https://github.com/vercel/nextjs-subscription-payments)
-- [Cookie-based Auth and the Next.js 13 App Router (free course)](https://youtube.com/playlist?list=PL5S4mPUpp4OtMhpnp93EFSo42iQ40XjbF)
-- [Supabase Auth and the Next.js App Router](https://github.com/supabase/supabase/tree/master/examples/auth/nextjs)
+### 4. Start the Next.js frontend:
+```bash
+cd ai-ui-app
+npm install
+npm run dev
+```
