@@ -51,11 +51,14 @@ export default function Home() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      // const response = await fetch("https://ai-flask-app-2.onrender.com/api/upload", {
-      const response = await fetch("http://127.0.0.1:5000/api/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        "https://ai-flask-app-2.onrender.com/api/upload",
+        {
+          // const response = await fetch("http://127.0.0.1:5000/api/upload", {
+          method: "POST",
+          body: formData,
+        }
+      );
       if (!response.ok) throw new Error("File upload failed");
 
       const data = await response.json();
