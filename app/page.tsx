@@ -221,12 +221,7 @@ export default function Home() {
         >
           <div className="w-full max-w-2xl rounded-xl shadow-lg p-6 bg-white dark:bg-gray-800 transition-colors">
             <h1 className="text-3xl font-bold mb-6 text-center">
-              <Link
-                href="/"
-                className="text-blue-600 dark:text-blue-400 hover:underline"
-              >
-                AI Interview Bot
-              </Link>
+              AI Interview Bot
             </h1>
 
             {feedback ? (

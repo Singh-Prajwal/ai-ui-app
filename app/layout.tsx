@@ -51,7 +51,7 @@ function AppShell({ children }: { children: React.ReactNode }) {
                 theme === "dark" ? "text-blue-400" : "text-blue-600"
               }`}
             >
-              <Link href="/">AI Interview Task</Link>
+              <a href="/">AI Interview Task</a>
             </div>
             <div className="flex gap-5 items-center">
               {/* <Link
