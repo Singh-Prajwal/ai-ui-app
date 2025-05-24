@@ -37,7 +37,6 @@ export async function POST(req: NextRequest) {
     messages: messages,
   });
   const content = completion.choices[0].message.content;
-  console.log("OpenAI response:", completion.choices[0].message.content);
 
   return NextResponse.json({
     question: content || "Tell me about yourself.",

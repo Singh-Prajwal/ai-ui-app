@@ -1,4 +1,3 @@
-// components/Feedback.tsx
 import React from "react";
 import { useTheme } from "next-themes";
 
@@ -14,7 +13,7 @@ const Feedback: React.FC<FeedbackProps> = ({ feedback }) => {
       className={`border rounded-xl p-4 my-4 transition-all duration-300 shadow-md ${
         theme === "dark"
           ? "bg-green-950 text-green-100 border-green-800"
-          : "bg-green-100 border-green-300 text-green-900"
+          : "bg-blue-100 border-green-300 text-Black-900"
       }`}
     >
       <h3 className="text-lg font-semibold mb-2">🧠 AI Interview Feedback</h3>

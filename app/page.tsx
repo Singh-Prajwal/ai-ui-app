@@ -3,7 +3,8 @@ import Chat from "@/components/Chat";
 import React, { useState } from "react";
 import { useTheme } from "next-themes";
 import Feedback from "@/components/Feedback";
-
+import { supabase } from "@/lib/supabase";
+import { InterviewInsert } from "../types/supabase";
 type Message = {
   role: "ai" | "user";
   content: string;
@@ -12,9 +13,9 @@ type Message = {
 export default function Home() {
   const { theme } = useTheme();
 
-  const [resumeText, setResumeText] = useState("");
+  const [resumeText, setResumeText] = useState<any>();
   const [name, setName] = useState("");
-  const [skills, setSkills] = useState<string[]>([]);
+  const [skills, setSkills] = useState<any>([]);
   const [loading, setLoading] = useState(false);
   const [isReady, setIsReady] = useState(false);
   const [resume, setResume] = useState<any>();
@@ -26,6 +27,7 @@ export default function Home() {
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    console.log("first file", file);
     if (!file) return;
 
     setLoading(true);
@@ -34,17 +36,19 @@ export default function Home() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      const response = await fetch("http://localhost:5000/api/upload", {
+      // const response = await fetch("https://ai-flask-app-2.onrender.com/api/upload", {
+      const response = await fetch("http://127.0.0.1:5000/api/upload", {
         method: "POST",
         body: formData,
       });
-
+      console.log("formData", formData);
       if (!response.ok) throw new Error("File upload failed");
 
       const data = await response.json();
-      setResumeText(data.text || "");
-      setName(data.name || "");
-      setSkills(data.skills || []);
+      console.log("data", data);
+      setResumeText(data.name || "");
+      // setName(data.name || "");
+      setSkills(Object.values(data.skills).flat() || []);
       setIsReady(true);
     } catch (error) {
       console.error("Error uploading file:", error);
@@ -141,14 +145,42 @@ export default function Home() {
 
       const data = await res.json();
       setFeedback(
-        data.feedback || "Thank you! Interview feedback unavailable."
+        data.feedbackSummary ||
+          "Thank you! Interview feedback at the moment try after some time."
       );
+      const saveInterview = async () => {
+        try {
+          const interviewData: InterviewInsert = {
+            candidate_name: name,
+            job_description: jobDesc,
+            feedback: feedback,
+            transcript: messages,
+            skills: skills,
+          };
+
+          const { data, error } = await supabase
+            .from("interviews")
+            .insert(interviewData)
+            .select()
+            .single();
+
+          if (error) throw error;
+          console.log("Interview saved successfully:", data);
+        } catch (error) {
+          console.error("Error saving interview:", error);
+        }
+      };
+      saveInterview();
     } catch (err) {
       console.error("Error getting feedback:", err);
       setFeedback("Error getting feedback. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const isFormValid = () => {
+    return name.trim() !== "" && jobDesc.trim() !== "" && isReady;
   };
 
   return (
@@ -162,81 +194,96 @@ export default function Home() {
           AI Interview Bot
         </h1>
 
-        {!isInterviewActive && !feedback && (
+        {feedback ? (
+          <Feedback feedback={feedback} />
+        ) : (
           <>
-            <label className="block mb-2 font-medium">Upload Resume</label>
-            <input
-              type="file"
-              accept=".pdf,.doc,.docx"
-              onChange={handleFileUpload}
-              className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
-              disabled={loading}
-            />
-            <input
-              type="text"
-              placeholder="Job Description (optional)"
-              value={jobDesc}
-              onChange={(e) => setJobDesc(e.target.value)}
-              className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
-            />
-            {name && (
-              <p className="mb-2">
-                <strong>Name:</strong> {name}
-              </p>
-            )}
-            {skills.length > 0 && (
-              <p className="mb-4">
-                <strong>Skills:</strong> {skills.join(", ")}
-              </p>
-            )}
+            {!isInterviewActive && !feedback && (
+              <>
+                <div className="mb-4">
+                  <label className="block mb-2 font-medium">Your Name *</label>
+                  <input
+                    type="text"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Enter your full name"
+                    className="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
+                    required
+                  />
+                </div>
 
-            <button
-              onClick={startInterview}
-              disabled={!isReady || loading}
-              className={`w-full py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                !isReady || loading
-                  ? "bg-gray-400 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 text-white"
-              }`}
-            >
-              {loading && !messages.length
-                ? "Analyzing Resume..."
-                : "Start Interview"}
-            </button>
-          </>
-        )}
-
-        {(isInterviewActive || feedback) && (
-          <>
-            <div className="mt-6">
-              <Chat
-                messages={messages}
-                onSend={sendMessage}
-                onEnd={endInterview}
-                isInterviewActive={isInterviewActive}
-              />
-
-              {feedback && <Feedback feedback={feedback} />}
-            </div>
-
-            <div className="flex justify-end mt-4">
-              {isInterviewActive && (
-                <button
-                  onClick={endInterview}
-                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold"
+                <label className="block mb-2 font-medium">Upload Resume</label>
+                <input
+                  type="file"
+                  accept=".pdf,.doc,.docx"
+                  onChange={handleFileUpload}
+                  className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
                   disabled={loading}
-                >
-                  End Interview
-                </button>
-              )}
-            </div>
-          </>
-        )}
+                />
 
-        {loading && (
-          <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-300 animate-pulse">
-            Processing...
-          </div>
+                <div className="mb-4">
+                  <label className="block mb-2 font-medium">
+                    Job Description *
+                  </label>
+                  <textarea
+                    value={jobDesc}
+                    onChange={(e) => setJobDesc(e.target.value)}
+                    placeholder="Enter the job description"
+                    className="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 min-h-[100px]"
+                    required
+                  />
+                </div>
+
+                {skills.length > 0 && (
+                  <p className="mb-4">
+                    <strong>Skills:</strong> {skills.join(", ")}
+                  </p>
+                )}
+
+                <button
+                  onClick={startInterview}
+                  disabled={!isFormValid() || loading}
+                  className={`w-full py-3 rounded-lg font-semibold transition-colors duration-200 ${
+                    !isFormValid() || loading
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 text-white"
+                  }`}
+                >
+                  {loading && !messages.length
+                    ? "Analyzing Resume..."
+                    : "Start Interview"}
+                </button>
+              </>
+            )}
+
+            {isInterviewActive && (
+              <>
+                <div className="mt-6">
+                  <Chat
+                    messages={messages}
+                    onSend={sendMessage}
+                    onEnd={endInterview}
+                    isInterviewActive={isInterviewActive}
+                  />
+                </div>
+                <div className="flex justify-end mt-4">
+                  <button
+                    onClick={endInterview}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold"
+                    disabled={loading}
+                  >
+                    End Interview
+                  </button>
+                </div>
+              </>
+            )}
+
+            {loading && (
+              <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-300 animate-pulse">
+                Processing...
+              </div>
+            )}
+          </>
         )}
       </div>
     </main>
