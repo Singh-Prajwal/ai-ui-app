@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useTheme } from "next-themes";
-
+import ProgressBar from "./Progressbar";
 type Message = {
   role: "ai" | "user";
   content: string;
@@ -14,6 +14,8 @@ interface ChatProps {
   isInterviewActive: boolean;
   isLoading?: boolean;
   error?: string | null;
+  currentQuestion?: number;
+  totalQuestions?: number;
 }
 
 const Chat: React.FC<ChatProps> = ({
@@ -24,6 +26,8 @@ const Chat: React.FC<ChatProps> = ({
   feedback,
   isLoading = false,
   error = null,
+  currentQuestion = 1,
+  totalQuestions = 10,
 }) => {
   const { theme } = useTheme();
   const [input, setInput] = useState("");
@@ -92,6 +96,9 @@ const Chat: React.FC<ChatProps> = ({
           </button>
         )}
       </div>
+      {isInterviewActive && (
+        <ProgressBar current={currentQuestion} total={totalQuestions} />
+      )}
 
       <div className="flex-1 overflow-y-auto space-y-4 mb-4 pr-2">
         {messages.length === 0 && !feedback && (

@@ -5,14 +5,21 @@ import { useTheme } from "next-themes";
 import Feedback from "@/components/Feedback";
 import { supabase } from "@/lib/supabase";
 import { InterviewInsert } from "../types/supabase";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import Alert from "@/components/alert";
 type Message = {
   role: "ai" | "user";
   content: string;
 };
 
 export default function Home() {
+  const [error, setError] = useState<{
+    type: "error" | "warning" | "info";
+    message: string;
+  } | null>(null);
   const { theme } = useTheme();
-
+  const [currentQuestion, setCurrentQuestion] = useState(1);
   const [resumeText, setResumeText] = useState<any>();
   const [name, setName] = useState("");
   const [skills, setSkills] = useState<any>([]);
@@ -24,11 +31,19 @@ export default function Home() {
   const [isInterviewActive, setIsInterviewActive] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [questions, setQuestions] = useState<string[]>([]);
-
+  const showError = (
+    message: string,
+    type: "error" | "warning" | "info" = "error"
+  ) => {
+    setError({ type, message });
+    if (error) setTimeout(() => setError(null), 5000);
+  };
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    console.log("first file", file);
-    if (!file) return;
+    if (!file) {
+      showError("Please select a file");
+      return;
+    }
 
     setLoading(true);
     setIsReady(false);
@@ -41,17 +56,16 @@ export default function Home() {
         method: "POST",
         body: formData,
       });
-      console.log("formData", formData);
       if (!response.ok) throw new Error("File upload failed");
 
       const data = await response.json();
-      console.log("data", data);
       setResumeText(data.name || "");
       // setName(data.name || "");
       setSkills(Object.values(data.skills).flat() || []);
       setIsReady(true);
     } catch (error) {
       console.error("Error uploading file:", error);
+      showError("Failed to process resume. Please try again.");
       alert("Failed to process resume.");
     } finally {
       setLoading(false);
@@ -79,6 +93,7 @@ export default function Home() {
       setMessages([{ role: "ai", content: firstQuestion }]);
     } catch (err) {
       console.error("Interview start failed:", err);
+      showError("Failed to start interview. Please try again.");
       setMessages([
         {
           role: "ai",
@@ -113,11 +128,14 @@ export default function Home() {
       const aiQuestionCount = finalMessages.filter(
         (m) => m.role === "ai"
       ).length;
-      if (aiQuestionCount >= 10 && isInterviewActive) {
+
+      setCurrentQuestion(aiQuestionCount);
+      if (aiQuestionCount == 10 && isInterviewActive) {
         await endInterview();
       }
     } catch (err) {
       console.error("Error getting next question:", err);
+      showError("Failed to get next question. Please try again.");
       setMessages([
         ...updatedMessages,
         { role: "ai", content: "Error getting next question. Try again!" },
@@ -184,107 +202,138 @@ export default function Home() {
   };
 
   return (
-    <main
-      className={`min-h-screen flex flex-col items-center justify-center px-4 py-8 transition-all duration-300 ${
-        theme === "dark" ? "bg-gray-900 text-white" : "bg-gray-100 text-black"
-      }`}
-    >
-      <div className="w-full max-w-2xl rounded-xl shadow-lg p-6 bg-white dark:bg-gray-800 transition-colors">
-        <h1 className="text-3xl font-bold mb-6 text-center">
-          AI Interview Bot
-        </h1>
+    <main className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-12 px-4 sm:px-6 lg:px-8">
+      {error && (
+        <Alert
+          type={error.type}
+          message={error.message}
+          onClose={() => setError(null)}
+        />
+      )}
+      <div className="max-w-3xl mx-auto">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-6 sm:p-8"
+        >
+          <div className="w-full max-w-2xl rounded-xl shadow-lg p-6 bg-white dark:bg-gray-800 transition-colors">
+            <h1 className="text-3xl font-bold mb-6 text-center">
+              <Link
+                href="/"
+                className="text-blue-600 dark:text-blue-400 hover:underline"
+              >
+                AI Interview Bot
+              </Link>
+            </h1>
 
-        {feedback ? (
-          <Feedback feedback={feedback} />
-        ) : (
-          <>
-            {!isInterviewActive && !feedback && (
+            {feedback ? (
+              <Feedback feedback={feedback} />
+            ) : (
               <>
-                <div className="mb-4">
-                  <label className="block mb-2 font-medium">Your Name *</label>
-                  <input
-                    type="text"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Enter your full name"
-                    className="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
-                    required
-                  />
-                </div>
+                {!isInterviewActive && !feedback && (
+                  <>
+                    <div className="mb-4">
+                      <label className="block mb-2 font-medium">
+                        Your Name *
+                      </label>
+                      <input
+                        type="text"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder="Enter your full name"
+                        className="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
+                        required
+                      />
+                    </div>
 
-                <label className="block mb-2 font-medium">Upload Resume</label>
-                <input
-                  type="file"
-                  accept=".pdf,.doc,.docx"
-                  onChange={handleFileUpload}
-                  className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
-                  disabled={loading}
-                />
+                    <label className="block mb-2 font-medium">
+                      Upload Resume
+                    </label>
+                    <input
+                      type="file"
+                      accept=".pdf,.doc,.docx"
+                      onChange={handleFileUpload}
+                      className="mb-4 w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600"
+                      disabled={loading}
+                    />
 
-                <div className="mb-4">
-                  <label className="block mb-2 font-medium">
-                    Job Description *
-                  </label>
-                  <textarea
-                    value={jobDesc}
-                    onChange={(e) => setJobDesc(e.target.value)}
-                    placeholder="Enter the job description"
-                    className="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 min-h-[100px]"
-                    required
-                  />
-                </div>
+                    <div className="mb-4">
+                      <label className="block mb-2 font-medium">
+                        Job Description *
+                      </label>
+                      <textarea
+                        value={jobDesc}
+                        onChange={(e) => setJobDesc(e.target.value)}
+                        placeholder="Enter the job description"
+                        className="w-full border rounded p-2 bg-white dark:bg-gray-700 dark:border-gray-600 min-h-[100px]"
+                        required
+                      />
+                    </div>
 
-                {skills.length > 0 && (
-                  <p className="mb-4">
-                    <strong>Skills:</strong> {skills.join(", ")}
-                  </p>
+                    {skills.length > 0 && (
+                      <p className="mb-4">
+                        <strong>Skills:</strong> {skills.join(", ")}
+                      </p>
+                    )}
+
+                    <button
+                      onClick={startInterview}
+                      disabled={!isFormValid() || loading}
+                      className={`w-full py-3 rounded-lg font-semibold transition-colors duration-200 ${
+                        !isFormValid() || loading
+                          ? "bg-gray-400 cursor-not-allowed"
+                          : "bg-blue-600 hover:bg-blue-700 text-white"
+                      }`}
+                    >
+                      {loading && !messages.length
+                        ? "Analyzing Resume..."
+                        : "Start Interview"}
+                    </button>
+                  </>
                 )}
 
-                <button
-                  onClick={startInterview}
-                  disabled={!isFormValid() || loading}
-                  className={`w-full py-3 rounded-lg font-semibold transition-colors duration-200 ${
-                    !isFormValid() || loading
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : "bg-blue-600 hover:bg-blue-700 text-white"
-                  }`}
-                >
-                  {loading && !messages.length
-                    ? "Analyzing Resume..."
-                    : "Start Interview"}
-                </button>
+                {isInterviewActive && (
+                  <>
+                    <div className="mt-6">
+                      <Chat
+                        messages={messages}
+                        onSend={sendMessage}
+                        onEnd={endInterview}
+                        isInterviewActive={isInterviewActive}
+                        currentQuestion={currentQuestion}
+                        totalQuestions={10}
+                      />
+                    </div>
+                    <div className="flex justify-end mt-4">
+                      <button
+                        onClick={endInterview}
+                        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold"
+                        disabled={loading}
+                      >
+                        End Interview
+                      </button>
+                    </div>
+                  </>
+                )}
+
+                {loading && (
+                  <div className="fixed bottom-4 right-4 bg-white dark:bg-gray-800 px-4 py-2 rounded-lg shadow-lg">
+                    <div className="flex items-center">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-900 dark:border-white mr-2"></div>
+                      <span>
+                        {messages.length
+                          ? "Processing response..."
+                          : isReady
+                            ? "Starting interview..."
+                            : "Processing resume..."}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </>
             )}
-
-            {isInterviewActive && (
-              <>
-                <div className="mt-6">
-                  <Chat
-                    messages={messages}
-                    onSend={sendMessage}
-                    onEnd={endInterview}
-                    isInterviewActive={isInterviewActive}
-                  />
-                </div>
-                <div className="flex justify-end mt-4">
-                  <button
-                    onClick={endInterview}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-semibold"
-                    disabled={loading}
-                  >
-                    End Interview
-                  </button>
-                </div>
-              </>
-            )}
-
-            {loading && (
-              <div className="mt-4 text-center text-sm text-gray-500 dark:text-gray-300 animate-pulse">
-                Processing...
-              </div>
-            )}
-          </>
-        )}
+          </div>
+        </motion.div>
       </div>
     </main>
   );
