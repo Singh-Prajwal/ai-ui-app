@@ -30,4 +30,4 @@ const Feedback: React.FC<FeedbackProps> = ({ feedback }) => {
   );
 };
 
-export default Feedback
+export default Feedback;

@@ -69,7 +69,6 @@ export default function Home() {
     } catch (error) {
       console.error("Error uploading file:", error);
       showError("Failed to process resume. Please try again.");
-      alert("Failed to process resume.");
     } finally {
       setLoading(false);
     }
