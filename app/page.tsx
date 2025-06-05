@@ -331,8 +331,8 @@ export default function Home() {
                         {messages.length
                           ? "Processing response..."
                           : isReady
-                          ? "Starting interview..."
-                          : "Processing resume..."}
+                            ? "Starting interview..."
+                            : "Processing resume..."}
                       </span>
                     </div>
                   </div>
